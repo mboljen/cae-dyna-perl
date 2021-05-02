@@ -1,7 +1,7 @@
 # Copyright 2020 Matthias Boljen. All rights reserved.
 #
 # Created:        Fr 2020-03-13 00:42:22 CET
-# Last Modified:  So 2021-02-07 12:03:14 CET
+# Last Modified:  So 2021-05-02 19:39:41 CEST
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
@@ -65,6 +65,7 @@ my %modulename = (
     '*HOURGLASS'                          => 'Hourglass',
     '*MAT_ELASTIC'                        => 'Mat_Elastic',
     '*MAT_NULL'                           => 'Mat_Null',
+    '*MAT_RIGID'                          => 'Mat_Rigid',
     '*MAT_PLASTIC_KINEMATIC'              => 'Mat_Plastic_Kinematic',
     '*MAT_SIMPLIFIED_RUBBER/FOAM'         => 'Mat_Simplified_Rubber_Foam',
     '*MAT_VISCOELASTIC'                   => 'Mat_Viscoelastic',
@@ -153,6 +154,7 @@ my %uidlabel = (
     'Mat_Elastic'                        => 'MID',
     'Mat_Null'                           => 'MID',
     'Mat_Plastic_Kinematic'              => 'MID',
+    'Mat_Rigid'                          => 'MID',
     'Mat_Simplified_Rubber_Foam'         => 'MID',
     'Mat_Viscoelastic'                   => 'MID',
     'Node'                               => 'NID',

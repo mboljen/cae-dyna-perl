@@ -1,7 +1,7 @@
 # Copyright 2020 Matthias Boljen. All rights reserved.
 #
 # Created:        Fr 2020-01-31 16:39:11 CET
-# Last Modified:  Do 2020-04-23 18:21:46 CEST
+# Last Modified:  So 2021-05-02 19:14:50 CEST
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
@@ -17,7 +17,7 @@ use Math::Vector::Real;
 extends 'CAE::DYNA::Keyword';
 
 has '+name' => (
-    default => '*NODE',
+    default => '*PART',
 );
 
 has 'heading' => (

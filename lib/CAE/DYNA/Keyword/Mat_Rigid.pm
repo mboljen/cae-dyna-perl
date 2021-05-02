@@ -1,12 +1,12 @@
 # Copyright 2020 Matthias Boljen. All rights reserved.
 #
 # Created:        Mo 2020-04-06 13:20:52 CEST
-# Last Modified:  So 2021-05-02 19:07:00 CEST
+# Last Modified:  So 2021-05-02 19:42:25 CEST
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
-package CAE::DYNA::Keyword::Section_Shell;
+package CAE::DYNA::Keyword::Mat_Rigid;
 
 use Moose;
 use namespace::autoclean;
@@ -16,114 +16,121 @@ use CAE::DYNA::Helpers;
 extends 'CAE::DYNA::Keyword';
 
 has '+name' => (
-    default => '*SECTION_SHELL',
+    default => '*MAT_RIGID',
 );
 
 has '+title_ok' => (
-    default => 1,
+    default => 1
 );
 
-has 'secid' => (
-    is       => 'rw',
-    isa      => 'Int',
+has 'mid' => (
+    is => 'rw',
+    isa => 'Str',
     required => 1,
 );
 
-has 'elform' => (
+has 'ro' => (
     is  => 'rw',
-    isa => 'Maybe[Int]',
+    isa => 'Maybe[Num]',
 );
 
-has 'shrf' => (
-    is      => 'rw',
-    isa     => 'Maybe[Num]',
-    default => 1.0,
+has 'e' => (
+    is => 'rw',
+    isa => 'Maybe[Num]',
 );
 
-has 'nip' => (
-    is      => 'rw',
-    isa     => 'Maybe[Num]',
-    default => 2.
+has 'pr' => (
+    is => 'rw',
+    isa => 'Maybe[Num]',
 );
 
-has 'propt' => (
-    is      => 'rw',
-    isa     => 'Maybe[Num]',
-    default => 0.0,
-);
-
-has 'qr_irid' => (
-    is      => 'rw',
-    isa     => 'Maybe[Num]',
-    default => 0.0,
-);
-
-has 'icomp' => (
-    is      => 'rw',
-    isa     => 'Maybe[Int]',
+has 'n' => (
+    is => 'rw',
+    isa => 'Num',
     default => 0,
 );
 
-has 'setyp' => (
-    is      => 'rw',
-    isa     => 'Maybe[Int]',
-    default => 1,
+has 'couple' => (
+    is => 'rw',
+    isa => 'Num',
+    default => 0,
 );
 
-has 't1' => (
-    is      => 'rw',
-    isa     => 'Maybe[Num]',
-    default => 0.0,
+has 'm' => (
+    is => 'rw',
+    isa => 'Num',
+    default => 0,
 );
 
-has 't2' => (
-    is  => 'rw',
+has 'alias' => (
+    is => 'rw',
+);
+
+has 'cmo' => (
+    is => 'rw',
     isa => 'Maybe[Num]',
+    default => 0,
 );
 
-has 't3' => (
-    is  => 'rw',
+has 'con1' => (
+    is => 'rw',
     isa => 'Maybe[Num]',
+    default => 0,
 );
 
-has 't4' => (
-    is  => 'rw',
+has 'con2' => (
+    is => 'rw',
     isa => 'Maybe[Num]',
+    default => 0,
 );
 
-has 'nloc' => (
-    is      => 'rw',
-    isa     => 'Maybe[Num]',
-    default => 0.0,
+has 'lco_a1' => (
+    is => 'rw',
+    isa => 'Num',
+    default => 0,
 );
 
-has 'marea' => (
-    is      => 'rw',
-    isa     => 'Maybe[Num]',
-    default => 0.0,
+has 'a2' => (
+    is => 'rw',
+    isa => 'Num',
+    default => 0,
 );
 
-has 'idof' => (
-    is      => 'rw',
-    isa     => 'Maybe[Num]',
-    default => 0.0,
+has 'a3' => (
+    is => 'rw',
+    isa => 'Num',
+    default => 0,
 );
 
-has 'edgset' => (
-    is  => 'rw',
-    isa => 'Maybe[Int]',
+has 'v1' => (
+    is => 'rw',
+    isa => 'Num',
+    default => 0,
 );
+
+has 'v2' => (
+    is => 'rw',
+    isa => 'Num',
+    default => 0,
+);
+
+has 'v3' => (
+    is => 'rw',
+    isa => 'Num',
+    default => 0,
+);
+
 
 
 =head1 NAME
 
-CAE::DYNA::Keyword::Section_Shell - Module for handling keyword
+CAE::DYNA::Keyword::Mat_Rigid - Module for handling LS-DYNA keyword
 
 =head1 VERSION
 
 =head1 SYNOPSIS
 
-    use CAE::DYNA::Keyword::Section_Shell;
+    use CAE::DYNA::Keyword::Mat_Rigid;
 
 =head1 DESCRIPTION
 
@@ -147,7 +154,7 @@ CAE::DYNA::Keyword::Section_Shell - Module for handling keyword
 sub uid
 {
     my ($self) = @_;
-    return $self->secid;
+    return $self->mid;
 }
 
 
@@ -176,7 +183,7 @@ sub read
     my $buffer  = $params->{buffer};
 
     # Check buffer boundaries
-    my ($buffer_min, $buffer_max) = ( 0, 2 );
+    my ($buffer_min, $buffer_max) = ( 0, 1 );
 
     #
     $buffer_max++ if $keyword =~ m/\_TITLE$/i;
@@ -186,44 +193,50 @@ sub read
 
     while (@{$buffer})
     {
-        # Fetch
+        # Fetch buffer
         my @card = splice @{$buffer}, 0, $buffer_max;
 
+        # Optional title card
         my ($title) =
             ($keyword =~ m/\_TITLE$/i) ?
                 CAE::DYNA::Helpers::unpackundef('A80', shift @card) : undef;
 
-        #
-        my ($secid, $elform, $shrf, $nip, $propt, $qr_irid, $icomp, $setyp) =
+        # Card 1
+        my ($mid, $ro, $e, $pr, $n, $couple, $m, $alias) =
+            CAE::DYNA::Helpers::unpackundef('A10' x 8, $card[0]);
+
+        # Card 2
+        my ($cmo, $con1, $con2) =
+            CAE::DYNA::Helpers::unpackundef('A10' x 8, $card[0]);
+
+        # Card 3
+        my ($lco_a1, $a2, $a3, $v1, $v2, $v3) =
             CAE::DYNA::Helpers::unpackundef('A10' x 8, $card[0]);
 
         #
-        my ($t1, $t2, $t3, $t4, $nloc, $marea, $idof, $edgset) =
-            CAE::DYNA::Helpers::unpackundef('A10' x 8, $card[1]);
-
-        #
         my $new = __PACKAGE__->new({
-            name    => $keyword,
-            host    => $host,
-            secid   => $secid,
-            elform  => $elform,
-            shrf    => $shrf,
-            nip     => $nip,
-            propt   => $propt,
-            qr_irid => $qr_irid,
-            icomp   => $icomp,
-            setyp   => $setyp,
-            t1      => $t1,
-            t2      => $t2,
-            t3      => $t3,
-            t4      => $t4,
-            nloc    => $nloc,
-            marea   => $marea,
-            idof    => $idof,
-            edgset  => $edgset,
+            name   => $keyword,
+            host   => $host,
+            mid    => $mid,
+            ro     => $ro,
+            e      => $e,
+            pr     => $pr,
+            n      => $n,
+            couple => $couple,
+            m      => $m,
+            alias  => $alias,
+            cmo    => $cmo,
+            con1   => $con1,
+            con2   => $con2,
+            lco_a1 => $lco_a1,
+            a2     => $a2,
+            a3     => $a3,
+            v1     => $v1,
+            v2     => $v2,
+            v3     => $v3,
         });
 
-        #
+        # Set title
         $new->title($title);
 
         # Add new object to results array
@@ -242,7 +255,7 @@ sub read
 
 =item stringify
 
-Prints shell section in keyword format.
+Prints the material in keyword format.
 
 =cut
 
@@ -261,44 +274,54 @@ sub stringify
         $str .= sprintf("%-80s\n", $self->title);
     }
 
-    # First card, labels
+    # Card 1
     $str .=
         sprintf("\$#%8s" . ("%10s" x 7) . "\n",
-            qw( secid elform shrf nip propt qr/irid icomp setyp ));
+            qw( mid ro e pr n couple m alias ));
 
-    # First card, values
+    #
     $str .=
-        sprintf(("%10s" x 8) . "\n",
-            $self->secid,
-            defined $self->elform  ? $self->elform  : '',
-            defined $self->shrf    ? $self->shrf    : '',
-            defined $self->nip     ? $self->nip     : '',
-            defined $self->propt   ? $self->propt   : '',
-            defined $self->qr_irid ? $self->qr_irid : '',
-            defined $self->icomp   ? $self->icomp   : '',
-            defined $self->setyp   ? $self->setyp   : '');
+        sprintf("%10s" x 8 . "\n",
+            $self->mid,
+            $self->ro,
+            defined $self->e      ? $self->e      : '',
+            defined $self->pr     ? $self->pr     : '',
+            defined $self->n      ? $self->n      : '',
+            defined $self->couple ? $self->couple : '',
+            defined $self->m      ? $self->m      : '',
+            defined $self->alias  ? $self->alias  : '' );
 
-    # Second card, labels
+    # Card 2
     $str .=
-        sprintf("\$#%8s" . ("%10s" x 7) . "\n",
-            qw( t1 t2 t3 t4 nloc marea idof edgset ));
+        sprintf("\$#%8s" . ("%10s" x 2) . "\n",
+            qw( cmo con1 con2 ));
 
-    # Second card, values
+    #
     $str .=
-        sprintf(("%10s" x 8) . "\n",
-            $self->t1,
-            defined $self->t2     ? $self->t2     : '',
-            defined $self->t3     ? $self->t3     : '',
-            defined $self->t4     ? $self->t4     : '',
-            defined $self->nloc   ? $self->nloc   : '',
-            defined $self->marea  ? $self->marea  : '',
-            defined $self->idof   ? $self->idof   : '',
-            defined $self->edgset ? $self->edgset : '' );
+        sprintf("%10s" x 3 . "\n",
+            $self->cmo,
+            $self->con1,
+            $self->con2);
+
+    # Card 3
+    $str .=
+        sprintf("\$#%8s" . ("%10s" x 5) . "\n",
+            qw( lco/a1 a2 a3 v1 v2 v3 ));
+
+    #
+    $str .=
+        sprintf("%10s" x 6 . "\n",
+            $self->lco_a1,
+            $self->a2,
+            $self->a3,
+            $self->v1,
+            $self->v2,
+            $self->v3);
 
     # Trim horizontal whitespace
     $str =~ s/\h+\n/\n/g;
 
-    # Return result
+    #
     return $str;
 }
 
